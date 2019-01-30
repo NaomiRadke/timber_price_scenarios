@@ -71,7 +71,24 @@ plot(WP_ts_diff1)
 
 ####### CREATING UNCERTAIN SCENARIOS #########################
   
+  #---- test: making future trajectories (from adding bootstrapped residuals to forecast) using simulate()
+   
+  n.yrs = 30 # number of forecasted years
+  n.sim = 10 # number of sampled future trajectories
+   
+  sim <- ts(matrix(0, nrow = n.yrs, ncol = n.sim), start = end(WP_ts)[1]+1) # empty ts matrix to be filled with simulations
+  for(i in 1:n.sim){
+    sim[,i] <- simulate(auto, nsim = n.yrs)
+  }
+    
+  autoplot(WP_ts)+
+    autolayer(sim)+
+    guides(legend = "none")
   
+ 
+   
+   #-----------
+   
   # STEP 1: Create a vector of residuals (fitted vs. data)
   resids <- auto$residuals
   
