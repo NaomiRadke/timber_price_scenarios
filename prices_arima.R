@@ -71,56 +71,24 @@ plot(WP_ts_diff1)
 
 ####### CREATING UNCERTAIN SCENARIOS #########################
   
-  #---- test: making future trajectories (from adding bootstrapped residuals to forecast) using simulate()
-   
+  # Some settings
   n.yrs = 30 # number of forecasted years
   n.sim = 10 # number of sampled future trajectories
-   
+  
+  # Simulating n.sim future trajectories (from adding bootstrapped residuals to forecast)
   sim <- ts(matrix(0, nrow = n.yrs, ncol = n.sim), start = end(WP_ts)[1]+1) # empty ts matrix to be filled with simulations
+  
   for(i in 1:n.sim){
     sim[,i] <- simulate(auto, nsim = n.yrs)
   }
-    
+  
+  # Plot the recoreded time series and plausible future trajectories  
   autoplot(WP_ts)+
     autolayer(sim)+
-    guides(legend = "none")
+    labs(title = "Wood price development and plausible future paths", y = "Wood price index")+
+    theme(legend.position = "none")+
+    ylim(c(0,250))
   
  
    
-   #-----------
-   
-  # STEP 1: Create a vector of residuals (fitted vs. data)
-  resids <- auto$residuals
-  
-  # STEP 2: Make n.boot bootstraps of the residuals
-  n.boot = 100 # define number of samples
-  t = 60      # number of years for forecast
-  set.seed(2019)
-  boot.resids <- data.frame(replicate(n.boot, sample(resids, length(resids), replace = TRUE)))
-  
-  boot.for <- data.frame(matrix(0, ncol = t, nrow = n.boot)) # initialize a vector for the forecasts
-  
-  # STEP 3: For each bootstrap add residuals to best fit arima model, fit a new model and make a forecast
-  for(i in 1:n.boot){
-    
-    # add the residuals to the best fit arima model
-    boot.WP <- auto$fitted + boot.resids[,i]
-    
-    # fit an arima model to the new data
-    auto_boot <- auto.arima(boot.WP, stepwise = FALSE, approximation = FALSE, seasonal = FALSE)
-    
-    # forecast new model
-    for_auto_boot <- forecast(auto_boot, h=t)
-    
-    # save forecasted WP scenarios in a data frame
-    boot.for[i,] <- for_auto_boot$mean 
-    
-    g <- g + autolayer(for_auto_boot$mean)
-  }
-  
-
-# plot the best fit arima model, its forecast (black line) and n.boot forecast realizations 
-  g+
-    scale_color_manual(labels = c("bootstrap"), values = c(2))+
-    ggtitle("Forecasts from ARIMA(1,0,0) and resampled residuals")
-  
+ 
