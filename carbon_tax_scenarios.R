@@ -10,11 +10,32 @@
 library(fitdistrplus) # for fitting distribution
 library(lhs) # for Latin Hypercube Sampling
 library(ggplot2) # for plotting
+library(reshape) # for melting columns for ggplot
 
 # Load data
-C_tax <- read.csv("carbon_tax.csv", sep = ";")
+C_tax <- read.csv("Data/carbon_tax.csv", sep = ";") #record
+C_tax$Date <- as.Date(C_tax$Date, "%d.%m.%Y") # change date column to date format
+C_tax$Year <- format(C_tax$Date, "%Y") # add a year column in date format
+C_tax_yearly <- aggregate(C_tax ~ Year, C_tax, mean)
+C_tax_yearly$Year <- as.Date(C_tax_yearly$Year, "%Y") # change year from character to date format
 
-# make a historgram of the price index
+C_tax_scen <- read.csv("Data/carbon_scenarios.csv", sep = ";") # scenarios
+C_tax_scen$Date <- as.Date(as.character(C_tax_scen$Date), "%Y")
+
+# make a graph of the carbon tax and scenarios
+
+  # scenarios
+C_tax_scen_long <- melt(C_tax_scen, id.vars = "Date") # change from wide to long format for plotting 
+ggplot(C_tax_scen_long, aes(x=Date, y = value))+
+  geom_line(aes(colour = variable))+
+  geom_line(data = C_tax_yearly, aes(y=C_tax, x = Year))+
+  ylab("Carbon price (Euro/ton C)")+
+  stat_summary(fun.y = mean, geom = "line", lwd = 2)
+
+
+#--- old stuff that I still need-----#
+
+  # histogram
 hist(C_tax$C_tax)
 
 

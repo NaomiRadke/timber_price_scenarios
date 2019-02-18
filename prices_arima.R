@@ -84,10 +84,12 @@ plot(WP_ts_diff1)
   
   # Plot the recoreded time series and plausible future trajectories  
   autoplot(WP_ts)+
+    ylim(c(0,250))+
     autolayer(sim)+
     labs(title = "Wood price development and plausible future paths", y = "Wood price index")+
-    theme(legend.position = "none")+
-    ylim(c(0,250))
+    theme_bw()+
+    theme(legend.position = "none")
+    
   
  
    
