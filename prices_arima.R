@@ -15,6 +15,8 @@ setwd("~/timber price")
 library(forecast) # for fitting arima and forecasting
 library(tseries)  # for turning data into time series data
 library(ggplot2)  # for plotting
+library(dplyr)
+library(zoo)
 
 # Load price data as time series
 WP <- read.csv("Data/Preis_Index_Buch_1971_2016.csv", sep = ";")# read the data from csv
@@ -91,6 +93,18 @@ plot(WP_ts_diff1)
     theme(legend.position = "none")
     
   
- 
-   
+ # So it can be used as forest growth model input, 1) calculate the  change in price index and the resulting exponent
+ # for the exponential dbh-revenue function
+
+  # change the ts object into a dataframe
+  sim_df <- as.data.frame(sim)
+  
+  # calculate 5-yr averages for PI (moving averages) and keep only every 5th column
+  sim_df_5yr <- rollapply(sim_df, 5, FUN = mean, by =5, align = "left")
+  
+  # calculate the exponent dependent on the change in PI relative to the PI in 2016 (116.3)
+  exp_scen <- (sim_df_5yr - 116.3)*0.0054+3.62
+  
+  # save the exponent scenarios as csv file 
+   write.csv(exp_scen, file = "Output/PI_exp_scen.csv")
  
